@@ -24,7 +24,9 @@ class PptParser {
 		}
 		return Optional.empty();
 	}
-
+	
+	
+	
 	static void replaceTextVariable(XSLFTextParagraph paragraph, PptMapper mapper) {
 		int indexOfStartVariable = -1;
 		List<XSLFTextRun> textPartsVariable = null;
@@ -32,19 +34,25 @@ class PptParser {
 		StringBuilder variableArgument = null;
 		State currentState = State.INITIAL;
 
+		/* An XSLFTextParagraph can have one or more XSLFTextRun
+		 * we are going through the text in each TextRun  */
 		for(XSLFTextRun textPart : paragraph.getTextRuns()) {
 			char[] textPartRaw = textPart.getRawText().toCharArray();
-			int indexOfChar = 0;
-
+			int indexOfChar = 0;  //this is always getting incremented for all textruns
+			
+			//now we are going through each char of the text from the XSLFTextRun
+			//we could be in different states depending on the current char we are scanning
+			
 			if(currentState.inVariable) {
 				textPartsVariable.add(textPart);
 			}
 
 			for(char c : textPartRaw) {
-				State nextState = process(currentState, c);
+				State nextState = processCharAndGetNextState(currentState, c);
 
 				switch (nextState) {
 				case INITIAL:
+					/*we were going through maybe a variable but we are back to initial state.. so parser has not found a expected match.  */
 					if(currentState != State.INITIAL) {
 						indexOfStartVariable = -1;
 						textPartsVariable = null;
@@ -78,11 +86,11 @@ class PptParser {
 				case END_VARIABLE:
 					indexOfChar = replaceVariable(
 						indexOfStartVariable,
-						indexOfChar,
+						indexOfChar, //this will be last char.. we need to replace from indexOfStartVariable to indexOfChar
 						mapper.textMapping(
 							variableName.toString(),
 							variableArgument == null ? null : variableArgument.toString()
-						),
+						),   /*this is returning the value which we want to use i.e this value should be used to replace the variable */
 						textPartsVariable
 					);
 					break;
@@ -93,6 +101,8 @@ class PptParser {
 			}
 		}
 	}
+	
+	
 
 	/**
 	 *
@@ -107,17 +117,22 @@ class PptParser {
 		if(!replacedText.isPresent()) {
 			return indexOfEndVariable;
 		}
-
+		
+		//going through all the textParts
 		for (int i = 0; i < textParts.size(); i++) {
 			XSLFTextRun textPart = textParts.get(i);
+			
 			if(i == 0) {
 				String partContent = textPart.getRawText();
 				StringBuilder textPartReplaced = new StringBuilder(partContent.substring(0, indexOfStartVariable));
 				textPartReplaced.append(replacedText.get());
+				
 				if(textParts.size() == 1) {
 					textPartReplaced.append(partContent.substring(indexOfEndVariable + 1));
 				}
 				textPart.setText(textPartReplaced.toString());
+				
+				
 				if(textParts.size() == 1) {
 					return replacedText.get().length() - 1;
 				}
@@ -129,27 +144,35 @@ class PptParser {
 			}
 		}
 
-		throw new RuntimeException("Parsing issue, please report at https://github.com/Coreoz/PPT-Templates/issues");
+		throw new RuntimeException("Parsing issue");
 	}
 
-	private static State process(State before, char c) {
+	private static State processCharAndGetNextState(State before, char c) {
 		switch (before) {
 		case END_VARIABLE:
+			
+			
+		/*If the next char starts with $ then it Maybe a variable */	
 		case INITIAL:
 			if(c == '$') {
 				return State.MAY_BE_VARIABLE;
 			}
 			break;
+			
+		/*If the next char after $ is / then it is start of variable  */	
 		case MAY_BE_VARIABLE:
 			if(c == '/') {
 				return State.START_VARIABLE;
 			}
 			break;
+		
+			/*if after / we dont find another / then we are going through the variable. */
 		case START_VARIABLE:
 			if(c != '/') {
 				return State.VARIABLE;
 			}
 			break;
+		/*if we find another / then its end of variable, but if we find a : then its start of an argument passed */	
 		case VARIABLE:
 			if(c == '/') {
 				return State.END_VARIABLE;
@@ -158,7 +181,7 @@ class PptParser {
 				return State.START_ARGUMENT;
 			}
 			return State.VARIABLE;
-		case START_ARGUMENT:
+		case START_ARGUMENT: /*we fallthrough the case */
 		case ARGUMENT:
 			if(c == '/') {
 				return State.END_VARIABLE;
@@ -168,10 +191,12 @@ class PptParser {
 
 		return State.INITIAL;
 	}
+	
+	
 
 	@AllArgsConstructor
 	private static enum State {
-		INITIAL(false),
+		INITIAL(false),    /*when we have just started scanning the text */
 		MAY_BE_VARIABLE(true),
 		START_VARIABLE(true),
 		VARIABLE(true),

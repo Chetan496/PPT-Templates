@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
 
 public class TestPPTTemplates {
 
-	public static void main(String[] args) {
+	public void test(String[] args) {
 
 		final String imagePath = "C:\\Users\\Chetan\\Pictures\\notfound.jpg";
 		byte[] jpgByteArray = null;

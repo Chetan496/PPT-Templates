@@ -10,5 +10,7 @@ import lombok.Value;
 class PptStyleShapeMapper {
 
 	private final BiConsumer<String, XSLFSimpleShape> applyStyle;
+	
+	
 
 }

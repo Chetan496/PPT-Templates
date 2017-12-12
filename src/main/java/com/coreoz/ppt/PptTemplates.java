@@ -89,7 +89,9 @@ public class PptTemplates {
 	private static void processShapesContainer(ShapeContainer<XSLFShape, ?> shapeContainer, XMLSlideShow ppt, PptMapper mapper) {
 		List<ImageToReplace> imagesToReplace = new ArrayList<>();
 		List<XSLFShape> shapesToDelete = new ArrayList<>();
-
+		
+		//shapes which are not instances of XSLFTextShape, XSLFTable, XSLFPicureShape, XSLFGroupShape will be removed
+		//else that shape will be processed i.e we will do the replacement
 		for(XSLFShape shape : shapeContainer.getShapes()) {
 			if(processShape(shape, imagesToReplace, ppt, mapper)) {
 				shapesToDelete.add(shape);
