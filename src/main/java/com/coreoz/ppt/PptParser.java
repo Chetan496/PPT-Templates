@@ -10,7 +10,8 @@ import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import lombok.AllArgsConstructor;
 
 class PptParser {
-
+	
+	/*this is returning the text between $/ / and there maybe an additional argument */
 	static Optional<PptVariable> parse(String text) {
 		if(text.startsWith("$/") && text.endsWith("/")) {
 			int indexStartParameter = text.indexOf(':');
@@ -119,6 +120,7 @@ class PptParser {
 		}
 		
 		//going through all the textParts
+		// alll these textParts are of the same XSLFTextParagraph
 		for (int i = 0; i < textParts.size(); i++) {
 			XSLFTextRun textPart = textParts.get(i);
 			
@@ -128,7 +130,7 @@ class PptParser {
 				textPartReplaced.append(replacedText.get());
 				
 				if(textParts.size() == 1) {
-					textPartReplaced.append(partContent.substring(indexOfEndVariable + 1));
+					textPartReplaced.append(partContent.substring(indexOfEndVariable + 1)); //the remaining text
 				}
 				textPart.setText(textPartReplaced.toString());
 				

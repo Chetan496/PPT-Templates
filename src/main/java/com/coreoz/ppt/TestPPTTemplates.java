@@ -1,5 +1,7 @@
 package com.coreoz.ppt;
 
+import java.awt.Color;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12,7 +14,7 @@ import javax.imageio.ImageIO;
 
 public class TestPPTTemplates {
 
-	public void test(String[] args) {
+	public static void main(String[] args) {
 
 		final String imagePath = "C:\\Users\\Chetan\\Pictures\\notfound.jpg";
 		byte[] jpgByteArray = null;
@@ -32,7 +34,32 @@ public class TestPPTTemplates {
 					new PptMapper().text("title", "Hello").text("secondline", "SecondLine")
 									.text("firstline", "FirstLine")
 									.image("image1", jpgByteArray, PptImageReplacementMode.RESIZE_ONLY )
+									.styleText( "sampleLink", textRun -> {
+										textRun.setBold(true);
+										textRun.setFontColor(Color.RED);
+									})
+									.styleText(  "sampleLink2", textRun -> {
+										textRun.setBold(true);
+										textRun.setItalic(true);
+										textRun.setFontColor(Color.GREEN);
+									})
+									.styleShape("sampleShape",  shape -> {
+										Rectangle2D shapeAnchor = shape.getAnchor();
+										
+										shape.setAnchor(new Rectangle2D.Double(
+											shapeAnchor.getX(),
+											shapeAnchor.getY(),
+											
+											// widen the shape of 20%
+											shapeAnchor.getWidth() * 1.5,
+											shapeAnchor.getHeight()
+										));
+										
+										shape.setFillColor(Color.CYAN);
+									})
 							        .processTemplate(new FileInputStream("E:\\Template.pptx")).write(out);
+					
+					
 					
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
