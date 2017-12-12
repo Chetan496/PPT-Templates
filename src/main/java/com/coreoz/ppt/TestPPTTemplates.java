@@ -42,20 +42,31 @@ public class TestPPTTemplates {
 										textRun.setBold(true);
 										textRun.setItalic(true);
 										textRun.setFontColor(Color.GREEN);
-									})
-									.styleShape("sampleShape",  shape -> {
+									}) /*this is how you make use of args. */
+									.styleShape("sampleShape",  (arg, shape) -> {
 										Rectangle2D shapeAnchor = shape.getAnchor();
 										
 										shape.setAnchor(new Rectangle2D.Double(
 											shapeAnchor.getX(),
 											shapeAnchor.getY(),
 											
-											// widen the shape of 20%
 											shapeAnchor.getWidth() * 1.5,
 											shapeAnchor.getHeight()
 										));
 										
-										shape.setFillColor(Color.CYAN);
+										if("green".equals(arg)) {
+											shape.setFillColor(Color.GREEN);	
+										}else {
+											shape.setFillColor(Color.BLACK);
+										}
+										
+									}) /*this is how you make use of args */
+									.text("varwitharg",   argument -> {
+										if("makemegreen".equals(argument)) {
+											return "green text";
+										}
+										
+										return "non green";
 									})
 							        .processTemplate(new FileInputStream("E:\\Template.pptx")).write(out);
 					
