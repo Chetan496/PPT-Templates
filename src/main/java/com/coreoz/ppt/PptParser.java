@@ -115,6 +115,7 @@ class PptParser {
 	 */
 	private static int replaceVariable(int indexOfStartVariable, int indexOfEndVariable,
 			Optional<String> replacedText, List<XSLFTextRun> textParts) {
+		
 		if(!replacedText.isPresent()) {
 			return indexOfEndVariable;
 		}
@@ -133,8 +134,7 @@ class PptParser {
 					textPartReplaced.append(partContent.substring(indexOfEndVariable + 1)); //the remaining text
 				}
 				textPart.setText(textPartReplaced.toString());
-				
-				
+	
 				if(textParts.size() == 1) {
 					return replacedText.get().length() - 1;
 				}
@@ -149,6 +149,8 @@ class PptParser {
 		throw new RuntimeException("Parsing issue");
 	}
 
+	
+	
 	private static State processCharAndGetNextState(State before, char c) {
 		switch (before) {
 		case END_VARIABLE:
